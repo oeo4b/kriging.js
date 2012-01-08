@@ -1,0 +1,4 @@
+Usage:
+
+var x = new kriging("mycanvas");
+x.init(mypolygons, [0, 0], 1);
