@@ -33,7 +33,7 @@ function kriging(id) {
 
   /* Global vars */
   var canvaspad = 50;
-  var pixelsize = 8;
+  var pixelsize = 4;
 
   /* Canvas element */
   var canvasobj = document.getElementById(id);
@@ -61,13 +61,10 @@ function kriging(id) {
     for(i=0;i<polygons.length;i++) {
       if(i==0) {
 	this.canvas.xlim = [polygons[i][0].min(), polygons[i][0].max()];
-	this.canvas.ylim = [polygons[i][1].min(), polygons[i][1].max()];
       }
       else {
         if(polygons[i][0].min()<this.canvas.xlim[0]) this.canvas.xlim[0] = polygons[i][0].min();
-        if(polygons[i][1].max()>this.canvas.xlim[1]) this.canvas.xlim[1] = polygons[i][1].max();
-        if(polygons[i][0].min()<this.canvas.ylim[0]) this.canvas.ylim[0] = polygons[i][0].min();
-        if(polygons[i][1].max()>this.canvas.ylim[1]) this.canvas.ylim[1] = polygons[i][1].max();
+        if(polygons[i][0].max()>this.canvas.xlim[1]) this.canvas.xlim[1] = polygons[i][0].max();
       }
     }
 
@@ -76,7 +73,11 @@ function kriging(id) {
      * between units.
      */
     this.canvas.xratio = (this.canvas.xlim[1]-this.canvas.xlim[0]) / this.canvas.width;
-    this.canvas.yratio = (this.canvas.ylim[1]-this.canvas.ylim[0]) / this.canvas.height;
+    this.canvas.yratio = this.canvas.xratio;
+
+    this.canvas.xlim = [center[0] - 0.5 * this.canvas.width * this.canvas.xratio, center[0] + 0.5 * this.canvas.width * this.canvas.xratio];
+    this.canvas.ylim = [center[1] - 0.5 * this.canvas.height * this.canvas.yratio, center[1] + 0.5 * this.canvas.height * this.canvas.yratio];
+
     this.canvas.xpixel = pixelsize * this.canvas.xratio;
     this.canvas.ypixel = pixelsize * this.canvas.yratio;
 
@@ -90,6 +91,7 @@ function kriging(id) {
     /* Resize event handlers */
     window.onresize = function(e) {
       canvasobj.height = window.innerHeight - canvasobj.offsetTop - canvaspad;
+      canvasobj.ylim[0] = canvasobj.ylim[1] - canvasobj.height * canvasobj.yratio;
       canvasobj.render();
     }
 
