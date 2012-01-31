@@ -1,8 +1,14 @@
 /**
-   Kriging class
+  *
+  * kriging.js
+  *
+  * Copyright 2012
+  */
 
+
+/**
+ * Extend the Array class
  */
-
 Array.prototype.max = function() {
   return Math.max.apply(null, this)
 }
@@ -33,38 +39,42 @@ function kriging(id) {
 
   /* Global vars */
   var canvaspad = 50;
-  var pixelsize = 4;
+  var pixelsize = 3;
+  var yxratio = 1;
 
   /* Canvas element */
   var canvasobj = document.getElementById(id);
   this.canvas = document.getElementById(id);
   this.canvas.ctx = this.canvas.getContext("2d");
 
-  /* Map switches */
-
-  /**
-   * Initialize the object properties and event handlers.
+  /* Kriging method 
+   * Usage: kriging(longitude, latitude, response, polygons)
    */
-  this.init = function(polygons, center, zoom) {
+  this.krig = function(polygons) {
     /* Bring the polygons and frame properties into the DOM */
     this.canvas.polygons = polygons;
+  }
 
+  /**
+   * Set up the map properties, event handlers and initialize the map.
+   */
+  this.map = function(center, zoom) {
     /* Set up the canvas frame */
     this.canvas.height = window.innerHeight - this.canvas.offsetTop - canvaspad;
-    this.canvas.style.border = "1px solid black";
+    this.canvas.style.border = "";
 
     /**
      * Loop through the polygons to determine the limits based on the 
      * area of each of the polygons. 
      */
     var i, j;
-    for(i=0;i<polygons.length;i++) {
+    for(i=0;i<this.canvas.polygons.length;i++) {
       if(i==0) {
-	this.canvas.xlim = [polygons[i][0].min(), polygons[i][0].max()];
+	this.canvas.xlim = [this.canvas.polygons[i][0].min(), this.canvas.polygons[i][0].max()];
       }
       else {
-        if(polygons[i][0].min()<this.canvas.xlim[0]) this.canvas.xlim[0] = polygons[i][0].min();
-        if(polygons[i][0].max()>this.canvas.xlim[1]) this.canvas.xlim[1] = polygons[i][0].max();
+        if(this.canvas.polygons[i][0].min()<this.canvas.xlim[0]) this.canvas.xlim[0] = this.canvas.polygons[i][0].min();
+        if(this.canvas.polygons[i][0].max()>this.canvas.xlim[1]) this.canvas.xlim[1] = this.canvas.polygons[i][0].max();
       }
     }
 
@@ -73,7 +83,7 @@ function kriging(id) {
      * between units.
      */
     this.canvas.xratio = (this.canvas.xlim[1]-this.canvas.xlim[0]) / this.canvas.width;
-    this.canvas.yratio = this.canvas.xratio;
+    this.canvas.yratio = this.canvas.xratio * yxratio;
 
     this.canvas.xlim = [center[0] - 0.5 * this.canvas.width * this.canvas.xratio, center[0] + 0.5 * this.canvas.width * this.canvas.xratio];
     this.canvas.ylim = [center[1] - 0.5 * this.canvas.height * this.canvas.yratio, center[1] + 0.5 * this.canvas.height * this.canvas.yratio];
@@ -125,8 +135,47 @@ function kriging(id) {
       canvasobj.mousedown = false;
     });
 
+    /**
+     * Navigation event handlers (zoom-in / zoom-out buttons)
+     */
+    var zoomin = document.createElement("input");
+    var zoomout = document.createElement("input");
+    zoomin.style.position = "absolute";
+    zoomout.style.position = "absolute";
+    zoomout.style.top = zoomin.size*2;
+    zoomin.type = "button";
+    zoomout.type = "button";
+    zoomin.value = "+";
+    zoomout.value = "~";
+    zoomin.onclick = function() { canvasobj.zoom(0.8, yxratio, pixelsize);}
+    zoomout.onclick = function() { canvasobj.zoom(1.2, yxratio, pixelsize);}
+    this.canvas.parentNode.insertBefore(zoomin, this.canvas);
+    this.canvas.parentNode.insertBefore(zoomout, this.canvas);
+    
     /* Start the map */
-    this.canvas.render();
+    this.canvas.zoom(zoom, yxratio, pixelsize);
+  }
+
+  /**
+   * Navigation
+   */
+  this.canvas.zoom = function(zoom, yxratio, pixelsize) {
+    /* Re-size the limits */
+    var newlen = [zoom * (this.xlim[1]-this.xlim[0])/2,
+                  zoom * (this.ylim[1]-this.ylim[0])/2];
+    var center = [(this.xlim[1]-this.xlim[0])/2 + this.xlim[0], 
+                  (this.ylim[1]-this.ylim[0])/2 + this.ylim[0]];
+
+    /* Reset the properties */
+    this.xlim = [center[0]-newlen[0], center[0]+newlen[0]];
+    this.ylim = [center[1]-newlen[1], center[1]+newlen[1]];
+    this.xratio = (this.xlim[1]-this.xlim[0]) / this.width;
+    this.yratio = this.xratio * yxratio;
+    this.xpixel = pixelsize * this.xratio;
+    this.ypixel = pixelsize * this.yratio;
+
+    /* Render the map */
+    this.render();
   }
 
   /** 
@@ -149,14 +198,14 @@ function kriging(id) {
   /* Fills the background with the polygons */
   this.canvas.background = function() {
     var i, j, k;
-
+    
     for(i=0;i<this.polygons.length;i++) {
       for(j = this.xpixel * Math.floor(this.polygons[i][0].min()/this.xpixel); j <= (this.xpixel * Math.ceil(this.polygons[i][0].max()/this.xpixel)); j+=this.xpixel) {
-	for(k = this.ypixel * Math.floor(this.polygons[i][1].min()/this.ypixel); k <= (this.ypixel * Math.ceil(this.polygons[i][1].max()/this.ypixel)); k+=this.ypixel) { 
-	  if(pip(this.polygons[i][0], this.polygons[i][1], j, k)) {
-	    this.pixel(j, k, "black");
+	  for(k = this.ypixel * Math.floor(this.polygons[i][1].min()/this.ypixel); k <= (this.ypixel * Math.ceil(this.polygons[i][1].max()/this.ypixel)); k+=this.ypixel) { 
+	    if(pip(this.polygons[i][0], this.polygons[i][1], j, k)) {
+	      this.pixel(j, k, "black");
+	    }
 	  }
-	}
       }   
     }
   }
