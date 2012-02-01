@@ -20,16 +20,11 @@ Make sure you've created a canvas element somewhere in your page before you star
 <canvas id="mycanvas"></canvas>
 ```
 
-That's it! All the supplied arguments should be 1-dimensional Array objects and `zoom` should be a positive value. The `polygons` argument should be a multi-dimensional Array object following theses general guideline:
+All the supplied arguments should be 1-dimensional Array objects and `zoom` should be a positive value. The `polygons` argument should be a multi-dimensional Array object. For polygons 1 through n, each x and y Array object refers to the longitude and latitude, respectively, coordinate vertices for that particular polygon:
 
 ``` javascript
-
-/* For polygons 1 through n, each x and y Array object refers to the longitude and latitude, respectively, coordinate vertices for that particular polygon. */
-
 var polygons = [[x1, y1], [x2, y2], ..., [xn, yn]];
-
 ```
-
 
 License
 -------
