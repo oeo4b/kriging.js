@@ -1,14 +1,12 @@
 /**
-  *
-  * kriging.js
-  *
-  * Copyright 2012
-  */
-
-
-/**
- * Extend the Array class
+ *
+ * kriging.js
+ *
+ * Copyright 2012
  */
+
+
+/* Extend the Array class */
 Array.prototype.max = function() {
   return Math.max.apply(null, this)
 }
@@ -24,12 +22,51 @@ Array.prototype.mean = function() {
   return sum / this.length;
 }
 
-/* Linear algebra functions */
-Array.prototype.inverse = function() {
-  var n = this.length;
-  var m = this.length[0];
+/**
+ * Ported R functions
+ */
 
-  
+R_rep = function(x, times) {
+  var i = new Array(times);
+  for(var j=0; j<i.length; j++) {
+    i[j] = x;
+  }
+  return i;
+}
+
+R_t = function(x) {
+  var i, j, n, m;
+  n = x.length;
+  if(x[0].length==undefined) m = 1;
+  else m = x[0].length;
+  var y = new Array(m);
+
+  for(i=0;i<n;i++) {
+    y[i] = new Array(n);
+    for(j=0;j<m;j++) {
+      y[j][i] = x[i][j];
+    }
+  }
+  return y;
+}
+
+R_solve = function(x) {
+  var i, j;
+  var n = x.length;
+  var x_inv = new Array(n);
+
+  for(i=0;i<n;i++) {
+    x_inv[i] = new Array(n);
+    for(j=0;j<n;j++) {
+
+    }
+  }
+  return x_inv;
+}
+
+R_lm = function(y, x) {
+  var lm = new Object();
+  return lm;
 }
 
 /* Point-in-polygon */
@@ -63,6 +100,8 @@ function kriging(id) {
   this.canvas = document.getElementById(id);
   this.canvas.ctx = this.canvas.getContext("2d");
 
+  /* New objects */
+  this.canvas.model = new Object();
 
   /* Kriging method 
    * Usage: kriging(longitude, latitude, response, polygons)
@@ -72,18 +111,17 @@ function kriging(id) {
     this.canvas.polygons = polygons;
    
     /**
-      * Calculate the euclidean distance matrix for the coordinates 
-      * and the outcome variable
-      */
+     * Calculate the euclidean distance matrix for the coordinates 
+     * and the outcome variable
+     */
+    this.canvas.model.n = response.length;
     var i, j, k;
-    var n = response.length;
-    var p = 2;
-    var D = new Array(n);
-    var V = new Array(n);
-    for(i=0; i<n; i++) {
-      D[i] = new Array(n);
-      V[i] = new Array(n);
-      for(j=0; j<n; j++) { 
+    var D = new Array(this.canvas.model.n);
+    var V = new Array(this.canvas.model.n);
+    for(i=0; i<this.canvas.model.n; i++) {
+      D[i] = new Array(this.canvas.model.n);
+      V[i] = new Array(this.canvas.model.n);
+      for(j=0; j<this.canvas.model.n; j++) { 
         D[i][j] = Math.sqrt(Math.pow(x[i]-x[j], 2) + Math.pow(y[i]-y[j], 2));
         V[i][j] = Math.abs(response[i] - response[j]);
       }
@@ -97,25 +135,74 @@ function kriging(id) {
     for(i=0; i<lags; i++) {
       sum_z = 0;
       n_h = 0;
-      for(j=0; j<n; j++) {
-	for(k=j+1; k<n; k++) {
-	  if(D[j][k] <= ((i+1)*cutoff/lags)) {
-	    sum_z += Math.pow(V[j][k], 2);
+      for(j=0; j<this.canvas.model.n; j++) {
+	  for(k=j+1; k<this.canvas.model.n; k++) {
+	    if(D[j][k] <= ((i+1)*cutoff/lags)) {
+	      sum_z += Math.pow(V[j][k], 2);
             n_h++;
+	    }
 	  }
-	}
       }
       semivariance[i] = sum_z / n_h;
     }
 
-    /* Model parameters */
-    this.canvas.model = new Object();
-    this.canvas.model.nugget = 0;
-    this.canvas.model.range = 0;
-    this.canvas.model.sill = 0;
+    /* Estimate the model parameters */
+    this.canvas.model.nugget = 1;
+    this.canvas.model.range = 2;
+    this.canvas.model.sill = 3;
 
+    /**
+      * Calculate the inverted (n+1) x (n+1) matrix
+      * Used to calculate weights
+      */
+    var X = new Array(this.canvas.model.n+1);
+    for(i=0;i<=this.canvas.model.n;i++) {
+      X[i] = new Array(this.canvas.model.n+1);
+      for(j=0;j<=this.canvas.model.n;j++) {
+        if(i==this.canvas.model.n && j!=this.canvas.model.n) X[i][j] = 1;
+        else {
+          if(i!=this.canvas.model.n && j==this.canvas.model.n) X[i][j] = 1;
+          else {
+            if(i==this.canvas.model.n && j==this.canvas.model.n) X[i][j] = 0;
+            else {
+              X[i][j] = this.spherical(D[i][j]);
+            }
+          }
+        }
+      }
+    }
+    
+    /* Invert the matrix */
+    this.canvas.model.X_inv = R_solve(X);
   }
 
+  /* Variogram models */
+  this.exponential = function(h) {
+    if(h==0) return 0;
+    else {
+      return this.canvas.model.nugget + (this.canvas.model.sill - this.canvas.model.nugget) * (1 - Math.exp((-3*Math.abs(h)) / this.canvas.model.range));
+    }
+  }
+
+  this.spherical = function(h) {
+    if(h>this.canvas.model.range) return this.canvas.model.sill;
+    if(h<=this.canvas.model.range && h>0) {
+      return this.canvas.model.nugget + (this.canvas.model.sill - this.canvas.model.nugget) * ((3*h)/(2*this.canvas.model.range) - Math.pow(h, 3) / (2*Math.pow(this.canvas.model.range, 3)));
+    }
+    else return 0;
+  }
+
+  /* Model prediction method */
+  this.canvas.model.pred = function(x, y) {
+    var i, j, k;
+    for(i=0; i<this.n; i++) {
+      for(j=0; j<this.n; j++) {
+        5+10;
+      }
+    }
+    
+    return "black";
+  }
 
   /**
    * Set up the map properties, event handlers and initialize the map.
@@ -276,11 +363,11 @@ function kriging(id) {
   /* Fills the background with the polygons */
   this.canvas.background = function() {
     /**
-      * 1) Nearest-neighbor
-      * 2) Loop through sorted polygons 
-      * 3) Point-in-polygon for eligible points
-      * 4) Break if no points in polygon
-      */
+     * 1) Nearest-neighbor
+     * 2) Loop through sorted polygons 
+     * 3) Point-in-polygon for eligible points
+     * 4) Break if no points in polygon
+     */
 
     var i, j, k;
     for(i=0; i<this.polygoncenters.length; i++) {
