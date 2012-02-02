@@ -55,7 +55,7 @@ function kriging(id) {
 
   /* Global vars */
   var canvaspad = 50;
-  var pixelsize = 4;
+  var pixelsize = 8;
   var yxratio = 1;
 
   /* Canvas element */
@@ -91,9 +91,21 @@ function kriging(id) {
 
     /* Fit the observations to the variogram */
     var lags = 10;
-    cutoff = Math.sqrt(Math.pow(x.max() - x.min(), 2) + Math.pow(y.max() - y.min(), 2)) / 3;
-    for(i=cutoff/lags; i<=cutoff; i+=cutoff/lags) {
-        
+    var sum_z, n_h;
+    var semivariance = new Array(lags);
+    var cutoff = Math.sqrt(Math.pow(x.max() - x.min(), 2) + Math.pow(y.max() - y.min(), 2)) / 3;
+    for(i=0; i<lags; i++) {
+      sum_z = 0;
+      n_h = 0;
+      for(j=0; j<n; j++) {
+	for(k=j+1; k<n; k++) {
+	  if(D[j][k] <= ((i+1)*cutoff/lags)) {
+	    sum_z += Math.pow(V[j][k], 2);
+            n_h++;
+	  }
+	}
+      }
+      semivariance[i] = sum_z / n_h;
     }
 
     /* Model parameters */
@@ -101,6 +113,7 @@ function kriging(id) {
     this.canvas.model.nugget = 0;
     this.canvas.model.range = 0;
     this.canvas.model.sill = 0;
+
   }
 
 
