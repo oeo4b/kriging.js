@@ -25,8 +25,8 @@ Array.prototype.mean = function() {
 /**
  * Ported R functions
  */
-
-R_rep = function(x, times) {
+/* Repeat a value */
+var R_rep = function(x, times) {
   var i = new Array(times);
   for(var j=0; j<i.length; j++) {
     i[j] = x;
@@ -34,23 +34,33 @@ R_rep = function(x, times) {
   return i;
 }
 
-R_t = function(x) {
+/* Matrix transpose */
+var R_t = function(x) {
+  /* Must be a 2-dimensional matrix */
   var i, j, n, m;
   n = x.length;
-  if(x[0].length==undefined) m = 1;
-  else m = x[0].length;
+  m = x[0].length;
+  
   var y = new Array(m);
-
-  for(i=0;i<n;i++) {
+  for(i=0;i<m;i++) {
     y[i] = new Array(n);
-    for(j=0;j<m;j++) {
-      y[j][i] = x[i][j];
+    for(j=0;j<n;j++) {
+	y[i][j] = x[j][i];
     }
   }
+
   return y;
 }
 
-R_solve = function(x) {
+
+/* Determinant */
+var R_det = function(a, n) {
+
+}
+
+/* Matrix inversion */
+var R_solve = function(x) {
+  /* Must be a 2-dimensional square matrix */
   var i, j;
   var n = x.length;
   var x_inv = new Array(n);
@@ -64,7 +74,8 @@ R_solve = function(x) {
   return x_inv;
 }
 
-R_lm = function(y, x) {
+/* Fit a linear model */
+var R_lm = function(y, x) {
   var lm = new Object();
   return lm;
 }
@@ -92,7 +103,7 @@ function kriging(id) {
 
   /* Global vars */
   var canvaspad = 50;
-  var pixelsize = 8;
+  var pixelsize = 4;
   var yxratio = 1;
 
   /* Canvas element */
