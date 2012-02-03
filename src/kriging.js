@@ -134,8 +134,42 @@ var R_solve = function(x) {
 
 /* Fit a linear model */
 var R_lm = function(y, x) {
-  var lm = new Object();
-  return lm;
+  var n = y.length;
+
+  /* Add an intercept term to the design matrix */
+  x = [R_rep(1, n), x];
+  y = [y];
+
+  /* OLS estimate */
+  return matrixmult(matrixmult(R_solve(matrixmult(R_t(x), x)), R_t(x)), y);
+}
+
+/* Cluster analysis */
+var R_kmeans = function(x, y, centers) {
+
+}
+
+/**
+ * Matrix multiplication 
+ */
+var matrixmult = function(y, x) {
+  var i, j, k;
+  var n = x.length;
+  var m = x[0].length;
+  if(m!=y.length) return false;
+  var p = y[0].length;
+  var z = new Array(n);
+
+  for(i=0;i<n;i++) {
+    z[i] = new Array(p);
+    for(j=0;j<p;j++) {
+      z[i][j] = 0;
+      for(k=0;k<m;k++) {
+        z[i][j] += x[i][k] * y[k][j]; 
+      }
+    }
+  }
+  return z;
 }
 
 /* Point-in-polygon */
@@ -177,6 +211,12 @@ function kriging(id) {
    */
   this.krig = function(x, y, response, polygons) {
     /* Bring the polygons and frame properties into the DOM */
+    this.canvas.model.x = x;
+    this.canvas.model.y = y;
+    this.canvas.model.response = response;
+    this.canvas.model.response_min = response.min();
+    this.canvas.model.response_max = response.max();
+    this.canvas.model.response_range = response.max() - response.min();
     this.canvas.polygons = polygons;
    
     /**
@@ -199,7 +239,8 @@ function kriging(id) {
     /* Fit the observations to the variogram */
     var lags = 10;
     var sum_z, n_h;
-    var semivariance = new Array(lags);
+    this.canvas.model.semivariance = new Array();
+    this.canvas.model.distance = new Array();
     var cutoff = Math.sqrt(Math.pow(x.max() - x.min(), 2) + Math.pow(y.max() - y.min(), 2)) / 3;
     for(i=0; i<lags; i++) {
       sum_z = 0;
@@ -212,13 +253,22 @@ function kriging(id) {
 	    }
 	  }
       }
-      semivariance[i] = sum_z / n_h;
+      if(!isNaN(sum_z / n_h)) {
+        this.canvas.model.semivariance.push(sum_z / n_h);
+        this.canvas.model.distance.push((i+1)*cutoff/lags);
+      }
+    }
+
+    /* Check for enough points in the lag model */
+    if(this.canvas.model.semivariance.length<3) {
+      /* ERROR -- quit app */
     }
 
     /* Estimate the model parameters */
-    this.canvas.model.nugget = 1;
-    this.canvas.model.range = 2;
-    this.canvas.model.sill = 3;
+    var coef = R_lm(this.canvas.model.semivariance, this.canvas.model.distance);
+    this.canvas.model.nugget = coef[0][0]; /* Intercept */
+    this.canvas.model.range = this.canvas.model.distance.max();
+    this.canvas.model.sill = coef[0][1] * this.canvas.model.range;
 
     /**
       * Calculate the inverted (n+1) x (n+1) matrix
@@ -234,7 +284,7 @@ function kriging(id) {
           else {
             if(i==this.canvas.model.n && j==this.canvas.model.n) X[i][j] = 0;
             else {
-              X[i][j] = this.spherical(D[i][j]);
+              X[i][j] = this.canvas.model.spherical(D[i][j]);
             }
           }
         }
@@ -242,35 +292,35 @@ function kriging(id) {
     }
     
     /* Invert the matrix */
-    //this.canvas.model.X_inv = R_solve(X);
+    this.canvas.model.X_inv = R_solve(X);
   }
 
   /* Variogram models */
-  this.exponential = function(h) {
+  this.canvas.model.exponential = function(h) {
     if(h==0) return 0;
     else {
-      return this.canvas.model.nugget + (this.canvas.model.sill - this.canvas.model.nugget) * (1 - Math.exp((-3*Math.abs(h)) / this.canvas.model.range));
+      return this.nugget + (this.sill - this.nugget) * (1 - Math.exp((-3*Math.abs(h)) / this.range));
     }
   }
 
-  this.spherical = function(h) {
-    if(h>this.canvas.model.range) return this.canvas.model.sill;
-    if(h<=this.canvas.model.range && h>0) {
-      return this.canvas.model.nugget + (this.canvas.model.sill - this.canvas.model.nugget) * ((3*h)/(2*this.canvas.model.range) - Math.pow(h, 3) / (2*Math.pow(this.canvas.model.range, 3)));
+  this.canvas.model.spherical = function(h) {
+    if(h>this.range) return this.sill;
+    if(h<=this.range && h>0) {
+      return this.nugget + (this.sill - this.nugget) * ((3*h)/(2*this.range) - Math.pow(h, 3) / (2*Math.pow(this.range, 3)));
     }
     else return 0;
   }
 
   /* Model prediction method */
   this.canvas.model.pred = function(x, y) {
-    var i, j, k;
-    for(i=0; i<this.n; i++) {
-      for(j=0; j<this.n; j++) {
-        5+10;
-      }
+    var i;
+    var L = R_rep(1, this.n+1);
+    for(i=0;i<this.n;i++) {
+      L[i] = Math.sqrt(Math.pow(this.x[i] - x, 2) + Math.pow(this.y[i] - y, 2))
     }
-    
-    return "black";
+    var R = matrixmult(this.X_inv, [L])[0];
+    R.pop();
+    return matrixmult(R_t([R]), [this.response])[0][0];
   }
 
   /**
@@ -414,6 +464,9 @@ function kriging(id) {
   /** 
    * Methods for drawing onto the canvas
    */
+
+  this.canvas.colorspectrum = ["#FF0000","#FF0E00","#FF1C00","#FF2A00","#FF3900","#FF4700","#FF5500","#FF6300","#FF7100","#FF8000","#FF8E00","#FF9C00","#FFAA00","#FFB800","#FFC6","#FFD500FF","#FFE300","#FFF100","#FFFF00","#FFFF15","#FFFF40","#FFFF6A","#FFFF95","#FFFFBF","#FFFFEA"];
+
   this.canvas.render = function() {
     this.clear();
     this.background();
@@ -446,6 +499,7 @@ function kriging(id) {
     var nearest = this.polygonsorted.indexOf(this.polygonsorted.min());
     var xbox = [0,0];
     var ybox = [0,0];
+    var color;
 
     for(i=0;i<this.polygons.length;i++) {
       /* Calculate the intersecting box */
@@ -464,7 +518,10 @@ function kriging(id) {
       for(j = xbox[0]; j <= xbox[1]; j += this.xpixel) {
         for(k = ybox[0]; k <= ybox[1]; k += this.ypixel) {
 	    if(pip(this.polygons[nearest][0], this.polygons[nearest][1], j, k)) {
-	      this.pixel(j, k, "black");
+            color = Math.round(15 * (this.model.pred(j, k) - this.model.response_min) / this.model.response_range);
+            if(color<0) color = 0;
+            if(color>15) color = 15;
+            this.pixel(j, k, this.colorspectrum[color])
 	    }
         }
       }
