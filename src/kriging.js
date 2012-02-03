@@ -48,30 +48,78 @@ var R_t = function(x) {
 	y[i][j] = x[j][i];
     }
   }
-
   return y;
 }
 
 
 /* Determinant */
-var R_det = function(a, n) {
+var R_det = function(x, n) {
+  var i, j, k, l;
+  var det = 0;
+  var m = new Array(n-1);
+  for(i=0;i<(n-1);i++) {
+    m[i] = new Array(n-1);
+  }
 
+  if(n<1) return;
+  else {
+    if(n==1) det = x[0][0];
+    else {
+      if(n==2) det = x[0][0]*x[1][1] - x[1][0]*x[0][1];
+      else {
+        det = 0;
+        for(i=0;i<n;i++) {
+          for(j=1;j<n;j++) {
+	    k=0;
+            for(l=0;l<n;l++) {
+	      if(l==i) continue;
+              m[j-1][k] = x[j][l];
+              k++;
+            }
+          }
+          det += Math.pow(-1, i+2) * x[0][i] * R_det(m, n-1);
+        }
+      }
+    }
+    return det;
+  }
+}
+
+/* Non-R function -- essential for R_solve */
+var cofactor = function(x, n) {
+  var i, j, k, l, m, o;
+  var det;
+  var c = new Array(n-1);
+  var y = new Array(n);
+
+  for(i=0;i<n;i++) y[i] = new Array(n);
+  for(i=0;i<(n-1);i++) c[i] = new Array(n-1);
+  for(i=0;i<n;i++) {
+    for(j=0;j<n;j++) {
+      k=0;
+      for(l=0;l<n;l++) {
+	if(l==j) continue;
+        m = 0;
+        for(o=0;o<n;o++) {
+	  if(o==j) continue;
+          c[k][m] = x[l][o];
+          m++;
+        }
+        k++;
+      }
+      det = R_det(c, n-1);
+      y[j][i] = Math.pow(-1, j+i+2) * det;
+    }
+  }
+  return y;
 }
 
 /* Matrix inversion */
 var R_solve = function(x) {
-  /* Must be a 2-dimensional square matrix */
-  var i, j;
-  var n = x.length;
-  var x_inv = new Array(n);
+  /* Solve to determine the adjunct matrix */
+  var adj = R_t(cofactor(x, x.length));
 
-  for(i=0;i<n;i++) {
-    x_inv[i] = new Array(n);
-    for(j=0;j<n;j++) {
-
-    }
-  }
-  return x_inv;
+  return adj;
 }
 
 /* Fit a linear model */
