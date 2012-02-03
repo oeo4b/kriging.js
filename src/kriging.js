@@ -101,7 +101,7 @@ var cofactor = function(x, n) {
 	if(l==j) continue;
         m = 0;
         for(o=0;o<n;o++) {
-	  if(o==j) continue;
+	  if(o==i) continue;
           c[k][m] = x[l][o];
           m++;
         }
@@ -117,9 +117,19 @@ var cofactor = function(x, n) {
 /* Matrix inversion */
 var R_solve = function(x) {
   /* Solve to determine the adjunct matrix */
+  var i, j;
   var adj = R_t(cofactor(x, x.length));
+  var inv_det_a = 1 / R_det(x, x.length);
+  var y = new Array(x.length);
 
-  return adj;
+  for(i=0;i<x.length;i++) {
+    y[i] = new Array(x.length);
+    for(j=0;j<x.length;j++) {
+      y[i][j] = inv_det_a * adj[i][j];
+    }
+  }
+
+  return y;
 }
 
 /* Fit a linear model */
@@ -151,7 +161,7 @@ function kriging(id) {
 
   /* Global vars */
   var canvaspad = 50;
-  var pixelsize = 4;
+  var pixelsize = 8;
   var yxratio = 1;
 
   /* Canvas element */
@@ -232,7 +242,7 @@ function kriging(id) {
     }
     
     /* Invert the matrix */
-    this.canvas.model.X_inv = R_solve(X);
+    //this.canvas.model.X_inv = R_solve(X);
   }
 
   /* Variogram models */
