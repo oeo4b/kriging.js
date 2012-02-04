@@ -467,10 +467,10 @@ function kriging(id) {
 
   /* Color spectrums */
   this.canvas.colorspectrum = new Object();
-  this.canvas.colorspectrum.heatcolors = ["#FF0000","#FF0E00","#FF1C00","#FF2A00","#FF3900","#FF4700","#FF5500","#FF6300","#FF7100","#FF8000","#FF8E00","#FF9C00","#FFAA00","#FFB800","#FFC600","#FFD500","#FFE300","#FFF100","#FFFF00","#FFFF15","#FFFF40","#FFFF6A","#FFFF95","#FFFFBF","#FFFFEA"];
-  this.canvas.colorspectrum.terraincolors = ["#00A600", "#10AC00", "#20B100", "#32B700", "#45BD00", "#59C300", "#6DC900", "#83CE00", "#9AD400", "#B2DA00", "#CBE000", "#E6E600", "#E6D612", "#E7C924", "#E8BF36", "#E9B848", "#EAB35A", "#EBB16D", "#ECB27F", "#EDB592", "#EEBCA5", "#EFC5B8", "#F0D1CB", "#F1E0DF", "#F2F2F2"];
-  this.canvas.colorspectrum.topocolors = ["#4C00FF", "#2600FF", "#0000FF", "#0026FF", "#004CFF", "#0073FF", "#0099FF", "#00BFFF", "#00E5FF", "#00FF4D", "#00FF21", "#0BFF00", "#37FF00", "#62FF00", "#8EFF00", "#BAFF00", "#E6FF00", "#FFFF00", "#FFF219", "#FFE833", "#FFE04D", "#FFDC66", "#FFDB80", "#FFDC99", "#FFE0B3"];
-  this.canvas.colorspectrum.cmcolors = ["#80FFFF", "#8AFFFF", "#95FFFF", "#9FFFFF", "#AAFFFF", "#B5FFFF", "#BFFFFF", "#CAFFFF", "#D4FFFF", "#DFFFFF", "#EAFFFF", "#F4FFFF", "#FFFFFF", "#FFF4FF", "#FFEAFF", "#FFDFFF", "#FFD5FF", "#FFCAFF", "#FFBFFF", "#FFB5FF", "#FFAAFF", "#FF9FFF", "#FF95FF", "#FF8AFF", "#FF80FF"];
+  this.canvas.colorspectrum.heatcolors = ["#FF0000", "#FF0700", "#FF0E00", "#FF1500", "#FF1C00", "#FF2200", "#FF2900", "#FF3000", "#FF3700", "#FF3E00", "#FF4500", "#FF4C00", "#FF5300", "#FF5A00", "#FF6000", "#FF6700", "#FF6E00", "#FF7500", "#FF7C00", "#FF8300", "#FF8A00", "#FF9100", "#FF9800", "#FF9F00", "#FFA500", "#FFAC00", "#FFB300", "#FFBA00", "#FFC100", "#FFC800", "#FFCF00", "#FFD600", "#FFDD00", "#FFE300", "#FFEA00", "#FFF100", "#FFF800", "#FFFF00", "#FFFF0B", "#FFFF20", "#FFFF35", "#FFFF4A", "#FFFF60", "#FFFF75", "#FFFF8A", "#FFFF9F", "#FFFFB5", "#FFFFCA", "#FFFFDF", "#FFFFF4"];
+  this.canvas.colorspectrum.terraincolors = ["#00A600", "#07A800", "#0EAB00", "#16AE00", "#1DB000", "#25B300", "#2DB600", "#36B800", "#3EBB00", "#47BE00", "#50C000", "#59C300", "#63C600", "#6CC800", "#76CB00", "#80CE00", "#8BD000", "#95D300", "#A0D600", "#ABD800", "#B6DB00", "#C2DE00", "#CEE000", "#D9E300", "#E6E600", "#E6DD09", "#E7D612", "#E7CF1C", "#E8C825", "#E8C32E", "#E9BE38", "#E9BA41", "#EAB74B", "#EAB454", "#EBB25E", "#EBB167", "#ECB171", "#ECB17B", "#EDB285", "#EDB48E", "#EEB798", "#EEBAA2", "#EFBFAC", "#EFC4B6", "#F0C9C0", "#F0D0CA", "#F1D7D4", "#F1DFDE", "#F2E8E8", "#F2F2F2"];
+  this.canvas.colorspectrum.topocolors = ["#4C00FF", "#3B00FF", "#2800FF", "#1600FF", "#0400FF", "#000DFF", "#001FFF", "#0032FF", "#0043FF", "#0055FF", "#0068FF", "#007AFF", "#008BFF", "#009EFF", "#00AFFF", "#00C1FF", "#00D3FF", "#00E5FF", "#00FF4D", "#00FF38", "#00FF24", "#00FF0F", "#05FF00", "#1AFF00", "#2EFF00", "#42FF00", "#57FF00", "#6BFF00", "#80FF00", "#94FF00", "#A8FF00", "#BDFF00", "#D1FF00", "#E6FF00", "#FFFF00", "#FFF90C", "#FFF318", "#FFED24", "#FFE930", "#FFE53B", "#FFE247", "#FFDF53", "#FFDD5F", "#FFDC6B", "#FFDB77", "#FFDB83", "#FFDB8F", "#FFDC9B", "#FFDEA7", "#FFE0B3"];
+  this.canvas.colorspectrum.cmcolors = ["#80FFFF", "#85FFFF", "#8AFFFF", "#8FFFFF", "#94FFFF", "#99FFFF", "#9EFFFF", "#A3FFFF", "#A8FFFF", "#ADFFFF", "#B3FFFF", "#B8FFFF", "#BDFFFF", "#C2FFFF", "#C7FFFF", "#CCFFFF", "#D1FFFF", "#D6FFFF", "#DBFFFF", "#E0FFFF", "#E6FFFF", "#EBFFFF", "#F0FFFF", "#F5FFFF", "#FAFFFF", "#FFFAFF", "#FFF5FF", "#FFF0FF", "#FFEBFF", "#FFE6FF", "#FFE0FF", "#FFDBFF", "#FFD6FF", "#FFD1FF", "#FFCCFF", "#FFC7FF", "#FFC2FF", "#FFBDFF", "#FFB8FF", "#FFB3FF", "#FFADFF", "#FFA8FF", "#FFA3FF", "#FF9EFF", "#FF99FF", "#FF94FF", "#FF8FFF", "#FF8AFF", "#FF85FF", "#FF80FF"];
 
   this.canvas.render = function() {
     this.clear();
@@ -543,10 +543,10 @@ function kriging(id) {
       for(j = xbox[0]; j <= xbox[1]; j += this.xpixel) {
         for(k = ybox[0]; k <= ybox[1]; k += this.ypixel) {
 	  if(pip(this.polygons[nearest][0], this.polygons[nearest][1], j, k)) {
-	    color = Math.round(24 * (this.model.pred(j, k) - this.model.response_min) / (this.model.response_range));
+	    color = Math.round(49 * (this.model.pred(j, k) - this.model.response_min) / (this.model.response_range));
             if(color<0) color = 0;
-            else if(color>24) color = 24;
-            this.pixel(j, k, this.colorspectrum.topocolors[color])
+            else if(color>49) color = 49;
+            this.pixel(j, k, this.colorspectrum.terraincolors[color])
 	  }
         }
       }
