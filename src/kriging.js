@@ -392,6 +392,8 @@ function kriging(id) {
       /* Reset mouse coordinates */
       canvasobj.mousex = e.pageX - canvasobj.offsetLeft;
       canvasobj.mousey = e.pageY - canvasobj.offsetTop;
+      var predicted = canvasobj.model.pred(canvasobj.xlim[0] + canvasobj.xratio*canvasobj.mousex, canvasobj.ylim[0] - canvasobj.yratio*canvasobj.mousey);
+      document.getElementById("output").innerHTML = "Predicted value: " + predicted;
 
      /* Drag the map if mouse is clicked */
       if(canvasobj.mousedown) {
@@ -465,7 +467,12 @@ function kriging(id) {
    * Methods for drawing onto the canvas
    */
 
-  this.canvas.colorspectrum = ["#FF0000","#FF0E00","#FF1C00","#FF2A00","#FF3900","#FF4700","#FF5500","#FF6300","#FF7100","#FF8000","#FF8E00","#FF9C00","#FFAA00","#FFB800","#FFC6","#FFD500FF","#FFE300","#FFF100","#FFFF00","#FFFF15","#FFFF40","#FFFF6A","#FFFF95","#FFFFBF","#FFFFEA"];
+  /* Color spectrums */
+  this.canvas.colorspectrum = new Object();
+  this.canvas.colorspectrum.heatcolors = ["#FF0000","#FF0E00","#FF1C00","#FF2A00","#FF3900","#FF4700","#FF5500","#FF6300","#FF7100","#FF8000","#FF8E00","#FF9C00","#FFAA00","#FFB800","#FFC600","#FFD500","#FFE300","#FFF100","#FFFF00","#FFFF15","#FFFF40","#FFFF6A","#FFFF95","#FFFFBF","#FFFFEA"];
+  this.canvas.colorspectrum.terraincolors = ["#00A600", "#10AC00", "#20B100", "#32B700", "#45BD00", "#59C300", "#6DC900", "#83CE00", "#9AD400", "#B2DA00", "#CBE000", "#E6E600", "#E6D612", "#E7C924", "#E8BF36", "#E9B848", "#EAB35A", "#EBB16D", "#ECB27F", "#EDB592", "#EEBCA5", "#EFC5B8", "#F0D1CB", "#F1E0DF", "#F2F2F2"];
+  this.canvas.colorspectrum.topocolors = ["#4C00FF", "#2600FF", "#0000FF", "#0026FF", "#004CFF", "#0073FF", "#0099FF", "#00BFFF", "#00E5FF", "#00FF4D", "#00FF21", "#0BFF00", "#37FF00", "#62FF00", "#8EFF00", "#BAFF00", "#E6FF00", "#FFFF00", "#FFF219", "#FFE833", "#FFE04D", "#FFDC66", "#FFDB80", "#FFDC99", "#FFE0B3"];
+  this.canvas.colorspectrum.cmcolors = ["#80FFFF", "#8AFFFF", "#95FFFF", "#9FFFFF", "#AAFFFF", "#B5FFFF", "#BFFFFF", "#CAFFFF", "#D4FFFF", "#DFFFFF", "#EAFFFF", "#F4FFFF", "#FFFFFF", "#FFF4FF", "#FFEAFF", "#FFDFFF", "#FFD5FF", "#FFCAFF", "#FFBFFF", "#FFB5FF", "#FFAAFF", "#FF9FFF", "#FF95FF", "#FF8AFF", "#FF80FF"];
 
   this.canvas.render = function() {
     this.clear();
@@ -517,12 +524,12 @@ function kriging(id) {
 
       for(j = xbox[0]; j <= xbox[1]; j += this.xpixel) {
         for(k = ybox[0]; k <= ybox[1]; k += this.ypixel) {
-	    if(pip(this.polygons[nearest][0], this.polygons[nearest][1], j, k)) {
-            color = Math.round(15 * (this.model.pred(j, k) - this.model.response_min) / this.model.response_range);
+	  if(pip(this.polygons[nearest][0], this.polygons[nearest][1], j, k)) {
+	    color = Math.round(24 * (this.model.pred(j, k) - this.model.response_min) / (this.model.response_range));
             if(color<0) color = 0;
-            if(color>15) color = 15;
-            this.pixel(j, k, this.colorspectrum[color])
-	    }
+            else if(color>24) color = 24;
+            this.pixel(j, k, this.colorspectrum.terraincolors[color])
+	  }
         }
       }
 
