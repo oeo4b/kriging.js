@@ -195,7 +195,7 @@ function kriging(id) {
 
   /* Global vars */
   var canvaspad = 50;
-  var pixelsize = 8;
+  var pixelsize = 1;
   var yxratio = 1;
 
   /* Canvas element */
@@ -392,8 +392,6 @@ function kriging(id) {
       /* Reset mouse coordinates */
       canvasobj.mousex = e.pageX - canvasobj.offsetLeft;
       canvasobj.mousey = e.pageY - canvasobj.offsetTop;
-      var predicted = canvasobj.model.pred(canvasobj.xlim[0] + canvasobj.xratio*canvasobj.mousex, canvasobj.ylim[0] - canvasobj.yratio*canvasobj.mousey);
-      document.getElementById("output").innerHTML = "Predicted value: " + predicted;
 
      /* Drag the map if mouse is clicked */
       if(canvasobj.mousedown) {
@@ -477,17 +475,37 @@ function kriging(id) {
   this.canvas.render = function() {
     this.clear();
     this.background();
+    this.points();
   }  
 
   this.canvas.pixel = function(x, y, col) {
     this.ctx.fillStyle = col;
-    this.ctx.fillRect((x-this.xlim[0])/this.xratio - pixelsize/2 + 1, this.height - (y-this.ylim[0])/this.yratio - pixelsize/2 + 1, pixelsize - 2, pixelsize - 2);
+    
+    /* Spaced-out pixels */
+    //this.ctx.fillRect((x-this.xlim[0])/this.xratio - pixelsize/2 + 1, this.height - (y-this.ylim[0])/this.yratio - pixelsize/2 + 1, pixelsize - 2, pixelsize - 2);
+
+    /* Solid map */
+    this.ctx.fillRect((x-this.xlim[0])/this.xratio - pixelsize/2, this.height - (y-this.ylim[0])/this.yratio - pixelsize/2, pixelsize, pixelsize);
+  }
+
+  this.canvas.focus = function(x, y, col) {
+    this.ctx.beginPath();
+    this.ctx.arc((x-this.xlim[0])/this.xratio - (2*pixelsize)/2, this.height - (y-this.ylim[0])/this.yratio - (2*pixelsize)/2, 2*pixelsize, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = col;
+    this.ctx.fill();
   }
   
   this.canvas.clear = function() {
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
 
+  /* Plot observed points */
+  this.canvas.points = function() {
+    var i;
+    for(i=0;i<this.model.n;i++) {
+      this.focus(this.model.x[i], this.model.y[i], "black");
+    }
+  }
 
   /* Fills the background with the polygons */
   this.canvas.background = function() {
@@ -528,7 +546,7 @@ function kriging(id) {
 	    color = Math.round(24 * (this.model.pred(j, k) - this.model.response_min) / (this.model.response_range));
             if(color<0) color = 0;
             else if(color>24) color = 24;
-            this.pixel(j, k, this.colorspectrum.terraincolors[color])
+            this.pixel(j, k, this.colorspectrum.topocolors[color])
 	  }
         }
       }
