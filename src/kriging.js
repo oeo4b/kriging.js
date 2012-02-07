@@ -85,7 +85,7 @@ var R_det = function(x, n) {
   }
 }
 
-/* Non-R function -- essential for R_solve */
+/* Non-R function -- essential for R_solve_ */
 var cofactor = function(x, n) {
   var i, j, k, l, m, o;
   var det;
@@ -114,8 +114,92 @@ var cofactor = function(x, n) {
   return y;
 }
 
-/* Matrix inversion */
-var R_solve = function(x) {
+/* Matrix inversion -- Gauss-jordan elimination */
+var R_solve = function(a) {
+  var n = a.length;
+  var m = n;
+  var b = new Array(n);
+  var indxc = new Array(n);
+  var indxr = new Array(n);
+  var ipiv = new Array(n);
+
+  var i, icol, irow, j, k, l, ll;
+  var big, dum, pivinv, temp;
+
+  for(i=0;i<n;i++) {
+    b[i] = new Array(n);
+    for(j=0;j<n;j++) {
+      if(i==j) b[i][j] = 1;
+      else b[i][j] = 0;
+    }
+  }
+  for(j=0;j<n;j++) ipiv[j] = 0;
+  for(i=0;i<n;i++) {
+    big = 0;
+    for(j=0;j<n;j++) {
+      if(ipiv[j]!=1) {
+	for(k=0;k<n;k++) {
+	  if(ipiv[k]==0) {
+	    if(Math.abs(a[j][k])>=big) {
+	      big = Math.abs(a[j][k]);
+              irow = j;
+              icol = k;
+            }
+          }
+        }
+      }
+    }
+    ++(ipiv[icol]);
+
+    if(irow!=icol) {
+      for(l=0;l<n;l++) {
+        temp = a[irow][l];
+        a[irow][l] = a[icol][l];
+        a[icol][l] = temp;
+      }
+      for(l=0;l<m;l++) {
+        temp = b[irow][l];
+        b[irow][l] = b[icol][l];
+        b[icol][l] = temp;
+      }
+    }
+
+    indxr[i] = irow;
+    indxc[i] = icol;
+
+    if(a[icol][icol]==0) { /* Singular matrix */
+      return false;
+    }
+
+    pivinv = 1 / a[icol][icol];
+    a[icol][icol] = 1;
+    for(l=0;l<n;l++) a[icol][l] *= pivinv;
+    for(l=0;l<m;l++) b[icol][l] *= pivinv;
+
+    for(ll=0;ll<n;ll++) {
+      if(ll!=icol) {
+        dum = a[ll][icol];
+        a[ll][icol] = 0;
+        for(l=0;l<n;l++) a[ll][l] -= a[icol][l]*dum;
+        for(l=0;l<m;l++) b[ll][l] -= b[icol][l]*dum;
+      }
+    }
+  }
+
+  for(l=(n-1);l>=0;l--) {
+    if(indxr[l]!=indxc[l]) {
+      for(k=0;k<n;k++) {
+        temp = a[k][indxr[l]];
+        a[k][indxr[l]] = a[k][indxc[l]];
+        a[k][indxc[l]] = temp;
+      }
+    }
+  }
+
+  return a;
+}
+
+var R_solve_cramers_rule = function(x) {
   /* Solve to determine the adjunct matrix */
   var i, j;
   var adj = R_t(cofactor(x, x.length));
@@ -426,8 +510,8 @@ function kriging(id) {
     zoomout.style.top = zoomin.size*2;
     zoomin.type = "button";
     zoomout.type = "button";
-    zoomin.value = "+";
-    zoomout.value = "~";
+    zoomin.value = "zoom in";
+    zoomout.value = "zoom out";
     zoomin.onclick = function() { canvasobj.zoom(0.8, yxratio, pixelsize);}
     zoomout.onclick = function() { canvasobj.zoom(1.2, yxratio, pixelsize);}
     this.canvas.parentNode.insertBefore(zoomin, this.canvas);
