@@ -6,7 +6,7 @@ kriging.js is an HTML5 implementation of an ordinary kriging algorithm using the
 Usage
 -----
 
-This library can be used by first instantiating an object of class kriging and supplying the following arguments to the contructor and other methods:
+This library can be used by first instantiating an object of class kriging and supplying the following arguments to the constructor and other methods:
 
 ``` javascript
 var x = new kriging("mycanvas");
