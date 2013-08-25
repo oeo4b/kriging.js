@@ -2,7 +2,7 @@
  *
  * kriging.js
  *
- * Copyright 2012
+ * Copyright 2012-2013
  */
 
 
