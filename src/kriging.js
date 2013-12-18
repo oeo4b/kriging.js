@@ -1,10 +1,3 @@
-/**
- *
- * kriging.js
- *
- * Copyright 2012-2013
- */
-
 
 /* Extend the Array class */
 Array.prototype.max = function() {
