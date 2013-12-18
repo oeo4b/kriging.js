@@ -26,8 +26,3 @@ All the supplied arguments should be 1-dimensional Array objects and `zoom` shou
 var polygons = [[x1, y1], [x2, y2], ..., [xn, yn]];
 ```
 
-License
--------
-
-Copyright 2012
-
