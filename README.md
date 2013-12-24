@@ -60,7 +60,7 @@ The variance parameter (α) of the prior distribution for w should be manually s
 Using the fitted kernel function hyperparameters and setting K as the Gram matrix, the prior and likelihood for the gaussian process become:
 
 - **y**       ~ N(**y**|**0**, **K**)
-- **t**|**y** ~ N(**t**|**y**, σ^2**I**)
+- **t**|**y** ~ N(**t**|**y**, σ^2 **I**)
 
 The variance parameter (σ^2) of the likelihood reflects the error in the gaussian process and should be manually set. 
 
