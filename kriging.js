@@ -15,6 +15,16 @@ Array.prototype.rep = function(n) {
     return Array.apply(null, new Array(n))
     .map(Number.prototype.valueOf, this[0]);
 };
+Array.prototype.pip = function(x, y) {
+    var i, j, c = false;
+    for(i=0,j=this.length-1;i<this.length;j=i++) {
+	if( ((this[i][1]>y) != (this[j][1]>y)) && 
+	    (x<(this[j][0]-this[i][0]) * (y-this[i][1]) / (this[j][1]-this[i][1]) + this[i][0]) ) {
+	    c = !c;
+	}
+    }
+    return c;
+}
 
 var kriging = function() {
     var kriging = {};
@@ -119,7 +129,7 @@ var kriging = function() {
     };
 
     // Train using gaussian processes with bayesian priors
-    kriging.train = function(t, x, y, model, alpha, beta) {
+    kriging.train = function(t, x, y, model, sigma2, alpha) {
 	var variogram = {
 	    t      : t,
 	    x      : x,
@@ -178,6 +188,7 @@ var kriging = function() {
 
 	// Feature transformation
 	n = l;
+	variogram.range = lag[n-1]-lag[0];
 	var X = [1].rep(2*n);
 	var Y = Array(n);
 	var A = variogram.A;
@@ -230,7 +241,7 @@ var kriging = function() {
 	}
 
 	// Inverse penalized Gram matrix projected to target vector
-	C = kriging_matrix_add(K, kriging_matrix_diag(1/beta, n), n, n);
+	C = kriging_matrix_add(K, kriging_matrix_diag(sigma2, n), n, n);
 	kriging_matrix_chol(C, n);
 	kriging_matrix_chol2inv(C, n);
 	var M = kriging_matrix_multiply(C, t, n, n, 1);
@@ -239,6 +250,7 @@ var kriging = function() {
 	return variogram;
     };
 
+    // Model prediction
     kriging.predict = function(x, y, variogram) {
 	var i, K = Array(variogram.n);
 	for(i=0;i<variogram.n;i++)
@@ -248,6 +260,11 @@ var kriging = function() {
 				   variogram.sill, variogram.A);
 	return kriging_matrix_multiply(K, variogram.M, 1, variogram.n, 1);
     };
+
+    // Mapping methods
+    kriging.grid = function(canvas, polygons, bbox, variogram) {
+	
+    }
 
     return kriging;
 }();
