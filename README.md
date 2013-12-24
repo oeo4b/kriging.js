@@ -1,28 +1,25 @@
 kriging.js
 ==========
 
-kriging.js is an HTML5 implementation of an ordinary kriging algorithm using the canvas element. This library is useful for spatial predictions and visualization of geographical data.
+**kriging.js** is a Javascript library providing spatial prediction and mapping capabilities via the ordinary kriging algorithm. 
 
-Usage
------
+Kriging is a type of gaussian process where 2-dimensional coordinates are mapped to some target (*f(x,y) => t*) using kernel regression. This algorithm has been specifically designed to accurately model smaller data sets by assmuming a set of bayesian priors on both the variogram parameters and the gaussian process.
 
-This library can be used by first instantiating an object of class kriging and supplying the following arguments to the constructor and other methods:
+Fitting a model
+---------------
 
-``` javascript
-var x = new kriging("mycanvas");
-x.krig(longitude, latitude, response, polygons);
-x.map(center, zoom);
-```
-
-Make sure you've created a canvas element somewhere in your page before you start the map:
+The first step is to link **kriging.js** to your html code and assign your coordinates and target variable to 3 separate arrays.
 
 ``` html
-<canvas id="mycanvas"></canvas>
+<script src="kriging.js" type="text/javascript"></script>
+<script type="text/javascript">
+	var t = [ /* Target variable */ ];
+	var x = [ /* X-axis coordinates */; ];
+	var y = [ /* Y-axis coordinates */; ];
+	var model = kriging.train(t, x, y, "gaussian", 100, 100);
+</script>
 ```
 
-All the supplied arguments should be 1-dimensional Array objects and `zoom` should be a positive value. The `polygons` argument should be a multi-dimensional Array object. For polygons 1 through n, each x and y Array object refers to the longitude and latitude, respectively, coordinate vertices for that particular polygon:
 
-``` javascript
-var polygons = [[x1, y1], [x2, y2], ..., [xn, yn]];
-```
-
+Creating a map
+--------------
