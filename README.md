@@ -5,7 +5,7 @@ kriging.js
 
 Kriging is a type of gaussian process where 2-dimensional coordinates are mapped to some target variable using kernel regression. This algorithm has been specifically designed to accurately model smaller data sets by assigning a prior to the variogram parameters.
 
-Fitting a model
+Fitting a Model
 ---------------
 
 The first step is to link **kriging.js** to your html code and assign your coordinate and target variables to 3 separate arrays.
@@ -24,12 +24,12 @@ The first step is to link **kriging.js** to your html code and assign your coord
 
 The train method in the kriging object fits your input to whatever variogram model you specify - gaussian, exponential or spherical - and returns a variogram object. 
 
-Bayesian priors and gaussian process
-------------------------------------
+Error and Bayesian Prior
+------------------------
 
 Notice the σ<sup>2</sup> (sigma2) and α (alpha) variables, these correspond to the variance parameters of the gaussian process and the prior of the variogram model, respectively. A standard normal variance σ<sup>2</sup> error and a diffuse α prior is typically used; a formal mathematical definition of the model is provided below.
 
-Predicting new values
+Predicting New Values
 ---------------------
 
 Values can be predicted for new coordinate pairs by using the predict method in the kriging object.
@@ -40,7 +40,7 @@ Values can be predicted for new coordinate pairs by using the predict method in 
   
 ```
 
-Creating a map
+Creating a Map
 --------------
 
 
