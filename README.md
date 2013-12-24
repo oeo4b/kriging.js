@@ -47,7 +47,7 @@ Creating a map
 Variogram and Probability Model
 -------------------------------
 
-The various variogram models can be interpreted as kernel functions for 2-dimensional coordinates **a**, **b** and parameters nugget, range, sill and A. Reparameterized as a linear function, with w = [nugget, (sill-nugget)/range ], this becomes:
+The various variogram models can be interpreted as kernel functions for 2-dimensional coordinates **a**, **b** and parameters nugget, range, sill and A. Reparameterized as a linear function, with w = [nugget, (sill-nugget)/range], this becomes:
   
 - Gaussian: k(**a**,**b**) = w[0] + w[1] * ( 1 - exp(-(||**a**-**b**||/range)^2 / A) )
 - Exponential: k(**a**,**b**) = w[0] + w[1] * ( 1 - exp(-(||**a**-**b**||/range) / A) )
