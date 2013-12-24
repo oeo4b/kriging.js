@@ -48,8 +48,16 @@ Creating a map
 Variogram and Probability Model
 -------------------------------
 
-y   ~ N(0, K)
-t|y ~ N(y, βI)
+The various variogram models can be interpreted as kernel functions for 2-dimensional coordinates *a*, *b* and parameters nugget, range, sill and A. Reparameterized as a linear function, this becomes:
+  
+  Gaussian:
+  k(*a*,*b*) = α[0] + α[1]*( 1 - exp(-(||*a*-*b*||/range)^2 / A) )
+  Exponential: 
+  k(*a*,*b*) = α[0] + α[1]*( 1 - exp(-(||*a*-*b*||/range) / A) )
+  Spherical:
+  k(*a*,*b*) = α[0] + α[1]*( 1.5*(||*a*-*b*||/range) - 0.5*(||*a*-*b*||/range)^3 )
+
+  Where α = [ nugget, (sill-nugget)/range ]
 
 
 
