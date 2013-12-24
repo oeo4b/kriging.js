@@ -24,10 +24,10 @@ The first step is to link **kriging.js** to your html code and assign your coord
 
 The train method in the kriging object fits your input to whatever variogram model you specify - gaussian, exponential or spherical - and returns a variogram object. 
 
-Bayesian priors
+Bayesian priors 
 ---------------
 
-Notice the alpha and beta variables, these correspond to the variance parameters of the gaussian priors of the variogram model and the gaussian process, respectively. A diffuse alpha (α) prior (~100) and standard normal variance beta (β) prior (1) is recommended; a formal mathematical explanation of the model is provided below.
+Notice the alpha and beta variables, these correspond to the variance parameters of the gaussian priors of the variogram model and the gaussian process, respectively. A diffuse alpha (α) prior (~100) and standard normal variance beta (β) error (1) is recommended; a formal mathematical explanation of the model is provided below.
 
 Predicting new values
 ---------------------
