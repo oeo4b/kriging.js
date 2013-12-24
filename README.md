@@ -27,7 +27,7 @@ The train method in the kriging object fits your input to whatever variogram mod
 Bayesian priors and gaussian process
 ------------------------------------
 
-Notice the sigma2 and alpha variables, these correspond to the variance parameters of the gaussian process and the prior of the variogram model, respectively. A standard normal variance sigma2 (σ^2) error and a diffuse alpha (α) prior (~100) is typically used; a formal mathematical definition of the model is provided below.
+Notice the σ<sup>2</sup> (sigma2) and α (alpha) variables, these correspond to the variance parameters of the gaussian process and the prior of the variogram model, respectively. A standard normal variance σ<sup>2</sup> error and a diffuse α prior is typically used; a formal mathematical definition of the model is provided below.
 
 Predicting new values
 ---------------------
@@ -49,20 +49,20 @@ Variogram and Probability Model
 
 The various variogram models can be interpreted as kernel functions for 2-dimensional coordinates **a**, **b** and parameters nugget, range, sill and A. Reparameterized as a linear function, with w = [nugget, (sill-nugget)/range], this becomes:
   
-- Gaussian: k(**a**,**b**) = w[0] + w[1] * ( 1 - exp(-(||**a**-**b**||/range)^2 / A) )
-- Exponential: k(**a**,**b**) = w[0] + w[1] * ( 1 - exp(-(||**a**-**b**||/range) / A) )
-- Spherical: k(**a**,**b**) = w[0] + w[1] * ( 1.5 * (||**a**-**b**||/range) - 0.5 * (||**a**-**b**||/range)^3 )
+- Gaussian: k(**a**,**b**) = w[0] + w[1] * ( 1 - exp{ -( ||**a**-**b**|| / range )<sup>2</sup> / A } )
+- Exponential: k(**a**,**b**) = w[0] + w[1] * ( 1 - exp{ -( ||**a**-**b**|| / range ) / A } )
+- Spherical: k(**a**,**b**) = w[0] + w[1] * ( 1.5 * ( ||**a**-**b**|| / range ) - 0.5 * ( ||**a**-**b**|| / range )<sup>3</sup> )
 
-The variance parameter (α) of the prior distribution for w should be manually set, according to:
+The variance parameter α of the prior distribution for w should be manually set, according to:
 
 - w ~ N(w|**0**, α**I**)
 
 Using the fitted kernel function hyperparameters and setting K as the Gram matrix, the prior and likelihood for the gaussian process become:
 
 - **y**       ~ N(**y**|**0**, **K**)
-- **t**|**y** ~ N(**t**|**y**, σ^2 **I**)
+- **t**|**y** ~ N(**t**|**y**, σ<sup>2</sup>**I**)
 
-The variance parameter (σ^2) of the likelihood reflects the error in the gaussian process and should be manually set. 
+The variance parameter σ<sup>2</sup> of the likelihood reflects the error in the gaussian process and should be manually set. 
 
 
 
