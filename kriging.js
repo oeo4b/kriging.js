@@ -74,6 +74,7 @@ var kriging = function() {
 	for(i=0;i<n;i++) {
 	    for(j=0;j<i;j++)
 		p[i] -= X[i*n+j]*X[i*n+j];
+	    if(p[i]<=0) return false;
 	    p[i] = Math.sqrt(p[i]);
 	    for(j=i+1;j<n;j++) {
 		for(k=0;k<i;k++)
@@ -82,7 +83,7 @@ var kriging = function() {
 	    }
 	}
 	for(i=0;i<n;i++) X[i*n+i] = p[i];
-
+	return true;
     };
     // Inversion of cholesky decomposition
     kriging_matrix_chol2inv = function(X, n) {
@@ -112,6 +113,81 @@ var kriging = function() {
 		X[i*n+j] = X[j*n+i];
 
     };
+    // Inversion via gauss-jordan elimination
+    kriging_matrix_solve = function(X, n) {
+	var m = n;
+	var b = Array(n*n);
+	var indxc = Array(n);
+	var indxr = Array(n);
+	var ipiv = Array(n);
+	var i, icol, irow, j, k, l, ll;
+	var big, dum, pivinv, temp;
+
+	for(i=0;i<n;i++) 
+	    for(j=0;j<n;j++) {
+		if(i==j) b[i*n+j] = 1;
+		else b[i*n+j] = 0;
+	    }
+	for(j=0;j<n;j++) ipiv[j] = 0;
+	for(i=0;i<n;i++) {
+	    big = 0;
+	    for(j=0;j<n;j++) {
+		if(ipiv[j]!=1) {
+		    for(k=0;k<n;k++) {
+			if(ipiv[k]==0) {
+			    if(Math.abs(X[j*n+k])>=big) {
+				big = Math.abs(X[j*n+k]);
+				irow = j;
+				icol = k;
+			    }
+			}
+		    }
+		}
+	    }
+	    ++(ipiv[icol]);
+
+	    if(irow!=icol) {
+		for(l=0;l<n;l++) {
+		    temp = X[irow*n+l];
+		    X[irow*n+l] = X[icol*n+l];
+		    X[icol*n+l] = temp;
+		}
+		for(l=0;l<m;l++) {
+		    temp = b[irow*n+l];
+		    b[irow*n+l] = b[icol*n+l];
+		    b[icol*n+l] = temp;
+		}
+	    }
+	    indxr[i] = irow;
+	    indxc[i] = icol;
+
+	    if(X[icol*n+icol]==0) return false; // Singular
+
+	    pivinv = 1 / X[icol*n+icol];
+	    X[icol*n+icol] = 1;
+	    for(l=0;l<n;l++) X[icol*n+l] *= pivinv;
+	    for(l=0;l<m;l++) b[icol*n+l] *= pivinv;
+
+	    for(ll=0;ll<n;ll++) {
+		if(ll!=icol) {
+		    dum = X[ll*n+icol];
+		    X[ll*n+icol] = 0;
+		    for(l=0;l<n;l++) X[ll*n+l] -= X[icol*n+l]*dum;
+		    for(l=0;l<m;l++) b[ll*n+l] -= b[icol*n+l]*dum;
+		}
+	    }
+	}
+	for(l=(n-1);l>=0;l--) 
+	    if(indxr[l]!=indxc[l]) {
+		for(k=0;k<n;k++) {
+		    temp = X[k*n+indxr[l]];
+		    X[k*n+indxr[l]] = X[k*n+indxc[l]];
+		    X[k*n+indxc[l]] = temp;
+		}
+	    }
+	
+	return true;
+    }
 
     // Variogram models
     kriging_variogram_gaussian = function(h, nugget, range, sill, A) {
@@ -171,20 +247,28 @@ var kriging = function() {
 	var tolerance = variogram.range/lags;
 	var lag = [0].rep(lags);
 	var semi = [0].rep(lags);
-	for(i=0,j=0,k=0,l=0;i<lags&&j<((n*n-n)/2);i++,k=0) {
-	    while( distance[j][0]<=((i+1)*tolerance) ) {
-		lag[l] += distance[j][0];
-		semi[l] += distance[j][1];
-		j++;k++;
-		if(j>=((n*n-n)/2)) break;
-	    }
-	    if(k>0) {
-		lag[l] /= k;
-		semi[l] /= k;
-		l++;
+	if(lags<30) {
+	    for(l=0;l<lags;l++) {
+		lag[l] = distance[l][0];
+		semi[l] = distance[l][1];
 	    }
 	}
-	if(l<2) return variogram; // Error: Not enough points
+	else {
+	    for(i=0,j=0,k=0,l=0;i<lags&&j<((n*n-n)/2);i++,k=0) {
+		while( distance[j][0]<=((i+1)*tolerance) ) {
+		    lag[l] += distance[j][0];
+		    semi[l] += distance[j][1];
+		    j++;k++;
+		    if(j>=((n*n-n)/2)) break;
+		}
+		if(k>0) {
+		    lag[l] /= k;
+		    semi[l] /= k;
+		    l++;
+		}
+	    }
+	    if(l<2) return variogram; // Error: Not enough points
+	}
 
 	// Feature transformation
 	n = l;
@@ -210,10 +294,15 @@ var kriging = function() {
 
 	// Least squares
 	var Xt = kriging_matrix_transpose(X, n, 2);
-	Z = kriging_matrix_multiply(Xt, X, 2, n, 2);
+	var Z = kriging_matrix_multiply(Xt, X, 2, n, 2);
 	Z = kriging_matrix_add(Z, kriging_matrix_diag(1/alpha, 2), 2, 2);
-	kriging_matrix_chol(Z, 2);
-	kriging_matrix_chol2inv(Z, 2);
+	var cloneZ = Z.slice(0);
+	if(kriging_matrix_chol(Z, 2))
+	    kriging_matrix_chol2inv(Z, 2);
+	else {
+	    kriging_matrix_solve(cloneZ, 2);
+	    Z = cloneZ;
+	}
 	var W = kriging_matrix_multiply(kriging_matrix_multiply(Z, Xt, 2, 2, n), Y, 2, n, 1);
 
 	// Variogram parameters
@@ -241,9 +330,14 @@ var kriging = function() {
 	}
 
 	// Inverse penalized Gram matrix projected to target vector
-	C = kriging_matrix_add(K, kriging_matrix_diag(sigma2, n), n, n);
-	kriging_matrix_chol(C, n);
-	kriging_matrix_chol2inv(C, n);
+	var C = kriging_matrix_add(K, kriging_matrix_diag(sigma2, n), n, n);
+	var cloneC = C.slice(0);
+	if(kriging_matrix_chol(C, n))
+	    kriging_matrix_chol2inv(C, n);
+	else {
+	    kriging_matrix_solve(cloneC, n);
+	    C = cloneC;
+	}
 	var M = kriging_matrix_multiply(C, t, n, n, 1);
 	variogram.M = M;
 
@@ -263,7 +357,7 @@ var kriging = function() {
 
     // Mapping methods
     kriging.grid = function(canvas, polygons, bbox, variogram) {
-	
+
     }
 
     return kriging;

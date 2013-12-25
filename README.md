@@ -17,7 +17,7 @@ The first step is to link **kriging.js** to your html code and assign your coord
 	var x = [ /* X-axis coordinates */ ];
 	var y = [ /* Y-axis coordinates */ ];
 	var model = "exponential";
-	var sigma2 = 1, alpha = 100;
+	var sigma2 = 0, alpha = 100;
 	var variogram = kriging.train(t, x, y, model, sigma2, alpha);
 </script>
 ```
@@ -27,7 +27,7 @@ The train method in the kriging object fits your input to whatever variogram mod
 Error and Bayesian Prior
 ------------------------
 
-Notice the σ<sup>2</sup> (sigma2) and α (alpha) variables, these correspond to the variance parameters of the gaussian process and the prior of the variogram model, respectively. A standard normal variance σ<sup>2</sup> error and a diffuse α prior is typically used; a formal mathematical definition of the model is provided below.
+Notice the σ<sup>2</sup> (sigma2) and α (alpha) variables, these correspond to the variance parameters of the gaussian process and the prior of the variogram model, respectively. A diffuse α prior is typically used; a formal mathematical definition of the model is provided below.
 
 Predicting New Values
 ---------------------
