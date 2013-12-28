@@ -199,7 +199,7 @@ var kriging = function() {
 	( 1.0 - Math.exp(-(1.0/A) * (h/range)) );
     };
     kriging_variogram_spherical = function(h, nugget, range, sill, A) {
-	if(h>range) return sill;
+	if(h>range) return nugget + (sill-nugget)/range;
 	return nugget + ((sill-nugget)/range)*
 	( 1.5*(h/range) - 0.5*Math.pow(h/range, 3) );
     };
