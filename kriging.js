@@ -357,7 +357,7 @@ var kriging = function() {
 
     // Mapping methods
     kriging.grid = function(canvas, polygons, bbox, variogram) {
-
+	var n;
     }
 
     return kriging;
