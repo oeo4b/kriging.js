@@ -423,13 +423,13 @@ var kriging = function() {
 	    a[1] = ((lxlim[1]+(width-((lxlim[1]-xlim[0])%width))) - xlim[0])/width;
 	    b[0] = ((lylim[0]-((lylim[0]-ylim[0])%width)) - ylim[0])/width;
 	    b[1] = ((lylim[1]+(width-((lylim[1]-ylim[0])%width))) - ylim[0])/width;	    
-	    for(i=a[0];i<=a[1];i++)
-		for(j=b[0];j<=b[1];j++) {
-		    xtarget = xlim[0] + i*width;
-		    ytarget = ylim[0] + j*width;
+	    for(j=a[0];j<=a[1];j++)
+		for(k=b[0];k<=b[1];k++) {
+		    xtarget = xlim[0] + j*width;
+		    ytarget = ylim[0] + k*width;
 		    if(polygons[i].pip(xtarget, ytarget))
-			A[i][j] = kriging.predict(xlim[0]+i*width,
-						  ylim[0]+j*width,
+			A[j][k] = kriging.predict(xlim[0]+j*width,
+						  ylim[0]+k*width,
 						  variogram);
 		}
 	}
