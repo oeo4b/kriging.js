@@ -440,7 +440,7 @@ var kriging = function() {
     };
 
     // Plotting on the DOM
-    kriging.plot(canvas, grid, xlim, ylim) {
+    kriging.plot = function(canvas, grid, xlim, ylim) {
 	
     };
 
