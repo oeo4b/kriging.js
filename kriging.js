@@ -356,7 +356,7 @@ var kriging = function() {
 					    Math.pow(y-variogram.y[i], 2), 0.5),
 				   variogram.nugget, variogram.range, 
 				   variogram.sill, variogram.A);
-	return kriging_matrix_multiply(k, variogram.M, 1, variogram.n, 1);
+	return kriging_matrix_multiply(k, variogram.M, 1, variogram.n, 1)[0];
     };
     kriging.variance = function(x, y, variogram) {
 	var i, k = Array(variogram.n);
@@ -369,24 +369,80 @@ var kriging = function() {
 			variogram.sill, variogram.A)+
 	kriging_matrix_multiply(kriging_matrix_multiply(k, variogram.K, 
 							1, variogram.n, variogram.n),
-				k, 1, variogram.n, 1);
+				k, 1, variogram.n, 1)[0];
     };
 
-    // Matrices or vectors of points
+    // Gridded matrices or contour paths
     kriging.grid = function(polygons, variogram, width) {
-	var i, j, n = length(polygons);
+	var i, j, k, n = polygons.length;
 	if(n==0) return;
 	
-	// Loop through polygons
-	
+	// Boundaries of polygons space
+	var xlim = [polygons[0][0][0], polygons[0][0][0]];
+	var ylim = [polygons[0][0][1], polygons[0][0][1]];
+	for(i=0;i<n;i++) // Polygons
+	    for(j=0;j<polygons[i].length;j++) { // Vertices
+		if(polygons[i][j][0]<xlim[0]) 
+		    xlim[0] = polygons[i][j][0];
+		if(polygons[i][j][0]>xlim[1])
+		    xlim[1] = polygons[i][j][0];
+		if(polygons[i][j][1]<ylim[0]) 
+		    ylim[0] = polygons[i][j][1];
+		if(polygons[i][j][1]>ylim[1])
+		    ylim[1] = polygons[i][j][1];
+	    }
 
+	// Alloc for O(n^2) space
+	var a = Array(2), b = Array(2);
+	var lxlim = Array(2); // Local dimensions
+	var lylim = Array(2); // Local dimensions
+	var x = (xlim[1]-xlim[0])/width;
+	var y = (ylim[1]-ylim[0])/width;
+	var A = Array(x+1);
+	for(i=0;i<=x;i++) A[i] = Array(y+1);
+	for(i=0;i<n;i++) {
+	    // Range for polygons[i]
+	    lxlim[0] = polygons[i][0][0];
+	    lxlim[1] = lxlim[0];
+	    lylim[0] = polygons[i][0][1];
+	    lylim[1] = lylim[0];
+	    for(j=1;j<polygons[i].length;j++) { // Vertices
+		if(polygons[i][j][0]<xlim[0]) 
+		    lxlim[0] = polygons[i][j][0];
+		if(polygons[i][j][0]>xlim[1])
+		    lxlim[1] = polygons[i][j][0];
+		if(polygons[i][j][1]<ylim[0]) 
+		    lylim[0] = polygons[i][j][1];
+		if(polygons[i][j][1]>ylim[1])
+		    lylim[1] = polygons[i][j][1];
+	    }
+
+	    // Loop through polygon subspace
+	    var xtarget, ytarget;
+	    a[0] = ((lxlim[0]-((lxlim[0]-xlim[0])%width)) - xlim[0])/width;
+	    a[1] = ((lxlim[1]+(width-((lxlim[1]-xlim[0])%width))) - xlim[0])/width;
+	    b[0] = ((lylim[0]-((lylim[0]-ylim[0])%width)) - ylim[0])/width;
+	    b[1] = ((lylim[1]+(width-((lylim[1]-ylim[0])%width))) - ylim[0])/width;	    
+	    for(i=a[0];i<=a[1];i++)
+		for(j=b[0];j<=b[1];j++) {
+		    xtarget = xlim[0] + i*width;
+		    ytarget = ylim[0] + j*width;
+		    if(polygons[i].pip(xtarget, ytarget))
+			A[i][j] = kriging.predict(xlim[0]+i*width,
+						  ylim[0]+j*width,
+						  variogram);
+		}
+	}
+	return A;
     };
-    kriging.lattice = function(polygons, variogram) {
+    kriging.contour = function(value, polygons, variogram) {
 
     };
 
     // Plotting on the DOM
-
+    kriging.plot(canvas, grid, xlim, ylim) {
+	
+    };
 
     return kriging;
 }();
