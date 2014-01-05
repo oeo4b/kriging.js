@@ -338,7 +338,11 @@ var kriging = function() {
 	    kriging_matrix_solve(cloneC, n);
 	    C = cloneC;
 	}
+
+	// Copy unprojected inverted matrix as K
+	var K = C.slice(0);
 	var M = kriging_matrix_multiply(C, t, n, n, 1);
+	variogram.K = K;
 	variogram.M = M;
 
 	return variogram;
@@ -346,19 +350,43 @@ var kriging = function() {
 
     // Model prediction
     kriging.predict = function(x, y, variogram) {
-	var i, K = Array(variogram.n);
+	var i, k = Array(variogram.n);
 	for(i=0;i<variogram.n;i++)
-	    K[i] = variogram.model(Math.pow(Math.pow(x-variogram.x[i], 2)+
+	    k[i] = variogram.model(Math.pow(Math.pow(x-variogram.x[i], 2)+
 					    Math.pow(y-variogram.y[i], 2), 0.5),
 				   variogram.nugget, variogram.range, 
 				   variogram.sill, variogram.A);
-	return kriging_matrix_multiply(K, variogram.M, 1, variogram.n, 1);
+	return kriging_matrix_multiply(k, variogram.M, 1, variogram.n, 1);
+    };
+    kriging.variance = function(x, y, variogram) {
+	var i, k = Array(variogram.n);
+	for(i=0;i<variogram.n;i++)
+	    k[i] = variogram.model(Math.pow(Math.pow(x-variogram.x[i], 2)+
+					    Math.pow(y-variogram.y[i], 2), 0.5),
+				   variogram.nugget, variogram.range, 
+				   variogram.sill, variogram.A);
+	return variogram.model(0, variogram.nugget, variogram.range, 
+			variogram.sill, variogram.A)+
+	kriging_matrix_multiply(kriging_matrix_multiply(k, variogram.K, 
+							1, variogram.n, variogram.n),
+				k, 1, variogram.n, 1);
     };
 
-    // Mapping methods
-    kriging.grid = function(canvas, polygons, bbox, variogram) {
-	var n;
-    }
+    // Matrices or vectors of points
+    kriging.grid = function(polygons, variogram, width) {
+	var i, j, n = length(polygons);
+	if(n==0) return;
+	
+	// Loop through polygons
+	
+
+    };
+    kriging.lattice = function(polygons, variogram) {
+
+    };
+
+    // Plotting on the DOM
+
 
     return kriging;
 }();
