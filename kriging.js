@@ -393,6 +393,7 @@ var kriging = function() {
 	    }
 
 	// Alloc for O(n^2) space
+	var xtarget, ytarget;
 	var a = Array(2), b = Array(2);
 	var lxlim = Array(2); // Local dimensions
 	var lylim = Array(2); // Local dimensions
@@ -418,9 +419,22 @@ var kriging = function() {
 	    }
 
 	    // Loop through polygon subspace
-	    var xtarget, ytarget;
+	    a[0] = ((lxlim[0]-((lxlim[0]-xlim[0])%width)) - xlim[0])/width;
+	    a[1] = ((lxlim[1]+(width-((lxlim[1]-xlim[0])%width))) - xlim[0])/width;
+	    b[0] = ((lylim[0]-((lylim[0]-ylim[0])%width)) - ylim[0])/width;
+	    b[1] = ((lylim[1]+(width-((lylim[1]-ylim[0])%width))) - ylim[0])/width;      
+	    for(j=a[0];j<=a[1];j++)
+		for(k=b[0];k<=b[1];k++) {
+		    xtarget = xlim[0] + j*width;
+		    ytarget = ylim[0] + k*width;
+		    if(polygons[i].pip(xtarget, ytarget))
+			A[j][k] = kriging.predict(xlim[0]+j*width,
+						  ylim[0]+k*width,
+						  variogram);
+		}
+
 	}
-	return [xlim, ylim];
+	return A;
     };
     kriging.contour = function(value, polygons, variogram) {
 
