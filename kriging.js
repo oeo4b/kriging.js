@@ -422,7 +422,7 @@ var kriging = function() {
 	    a[0] = ((lxlim[0]-((lxlim[0]-xlim[0])%width)) - xlim[0])/width;
 	    a[1] = ((lxlim[1]-((lxlim[1]-xlim[1])%width)) - xlim[0])/width;
 	    b[0] = ((lylim[0]-((lylim[0]-ylim[0])%width)) - ylim[0])/width;
-	    a[1] = ((lylim[1]-((lylim[1]-ylim[1])%width)) - ylim[0])/width;
+	    b[1] = ((lylim[1]-((lylim[1]-ylim[1])%width)) - ylim[0])/width;
 	    for(j=a[0];j<=a[1];j++)
 		for(k=b[0];k<=b[1];k++) {
 		    xtarget = xlim[0] + j*width;
