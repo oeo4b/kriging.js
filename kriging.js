@@ -408,28 +408,28 @@ var kriging = function() {
 	    lylim[0] = polygons[i][0][1];
 	    lylim[1] = lylim[0];
 	    for(j=1;j<polygons[i].length;j++) { // Vertices
-		if(polygons[i][j][0]<xlim[0]) 
+		if(polygons[i][j][0]<lxlim[0]) 
 		    lxlim[0] = polygons[i][j][0];
-		if(polygons[i][j][0]>xlim[1])
+		if(polygons[i][j][0]>lxlim[1])
 		    lxlim[1] = polygons[i][j][0];
-		if(polygons[i][j][1]<ylim[0]) 
+		if(polygons[i][j][1]<lylim[0]) 
 		    lylim[0] = polygons[i][j][1];
-		if(polygons[i][j][1]>ylim[1])
+		if(polygons[i][j][1]>lylim[1])
 		    lylim[1] = polygons[i][j][1];
 	    }
 
 	    // Loop through polygon subspace
 	    a[0] = ((lxlim[0]-((lxlim[0]-xlim[0])%width)) - xlim[0])/width;
-	    a[1] = ((lxlim[1]+(width-((lxlim[1]-xlim[0])%width))) - xlim[0])/width;
+	    a[1] = ((lxlim[1]-((lxlim[1]-xlim[1])%width)) - xlim[0])/width;
 	    b[0] = ((lylim[0]-((lylim[0]-ylim[0])%width)) - ylim[0])/width;
-	    b[1] = ((lylim[1]+(width-((lylim[1]-ylim[0])%width))) - ylim[0])/width;      
+	    a[1] = ((lylim[1]-((lylim[1]-ylim[1])%width)) - ylim[0])/width;
 	    for(j=a[0];j<=a[1];j++)
 		for(k=b[0];k<=b[1];k++) {
 		    xtarget = xlim[0] + j*width;
 		    ytarget = ylim[0] + k*width;
 		    if(polygons[i].pip(xtarget, ytarget))
-			A[j][k] = kriging.predict(xlim[0]+j*width,
-						  ylim[0]+k*width,
+			A[j][k] = kriging.predict(xtarget,
+						  ytarget,
 						  variogram);
 		}
 
