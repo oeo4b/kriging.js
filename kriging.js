@@ -454,14 +454,14 @@ var kriging = function() {
 	var i, j, x, y;
 	var n = grid.length;
 	var m = grid[0].length;
-	var wx = grid.width*canvas.width/(xlim[1]-xlim[0]);
-	var wy = grid.width*canvas.height/(ylim[1]-ylim[0]);
+	var wx = Math.ceil(grid.width*canvas.width/(xlim[1]-xlim[0]));
+	var wy = Math.ceil(grid.width*canvas.height/(ylim[1]-ylim[0]));
 	for(i=0;i<n;i++)
 	    for(j=0;j<m;j++) {
 		if(grid[i][j]==undefined) continue;
 		x = canvas.width*(i*grid.width+grid.xlim[0]-xlim[0])/range[0];
 		y = canvas.height*(1-(j*grid.width+grid.ylim[0]-ylim[0])/range[1]);
-		ctx.fillRect(x-wx/2, y-wy/2, wx, wy);
+		ctx.fillRect(Math.round(x-wx/2), Math.round(y-wy/2), wx, wy);
 	    }
 
     };
