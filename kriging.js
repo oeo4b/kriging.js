@@ -432,8 +432,10 @@ var kriging = function() {
 						  ytarget,
 						  variogram);
 		}
-
 	}
+	A.xlim = xlim;
+	A.ylim = ylim;
+	A.width = width;
 	return A;
     };
     kriging.contour = function(value, polygons, variogram) {
@@ -442,8 +444,27 @@ var kriging = function() {
 
     // Plotting on the DOM
     kriging.plot = function(canvas, grid, xlim, ylim) {
-	
+	// Clear screen 
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	// Starting boundaries
+	var range = [xlim[1]-xlim[0], ylim[1]-ylim[0]];
+	var i, j, x, y;
+	var n = grid.length;
+	var m = grid[0].length;
+	var wx = grid.width*canvas.width/(xlim[1]-xlim[0]);
+	var wy = grid.width*canvas.height/(ylim[1]-ylim[0]);
+	for(i=0;i<n;i++)
+	    for(j=0;j<m;j++) {
+		if(grid[i][j]==undefined) continue;
+		x = canvas.width*(i*grid.width+grid.xlim[0]-xlim[0])/range[0];
+		y = canvas.height*(1 - (j*grid.width+grid.ylim[0]-ylim[0])/range[1]);
+		ctx.fillRect(x-wx/2, y-wx/2, wx, wy);
+	    }
+
     };
+    
 
     return kriging;
 }();
