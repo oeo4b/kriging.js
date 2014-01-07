@@ -436,6 +436,7 @@ var kriging = function() {
 	}
 	A.xlim = xlim;
 	A.ylim = ylim;
+	A.zlim = [variogram.t.min(), variogram.t.max()];
 	A.width = width;
 	return A;
     };
@@ -450,8 +451,8 @@ var kriging = function() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	// Starting boundaries
-	var range = [xlim[1]-xlim[0], ylim[1]-ylim[0]];
-	var i, j, x, y;
+	var range = [xlim[1]-xlim[0], ylim[1]-ylim[0], grid.zlim[1]-grid.zlim[0]];
+	var i, j, x, y, z;
 	var n = grid.length;
 	var m = grid[0].length;
 	var wx = Math.ceil(grid.width*canvas.width/(xlim[1]-xlim[0]));
@@ -461,6 +462,11 @@ var kriging = function() {
 		if(grid[i][j]==undefined) continue;
 		x = canvas.width*(i*grid.width+grid.xlim[0]-xlim[0])/range[0];
 		y = canvas.height*(1-(j*grid.width+grid.ylim[0]-ylim[0])/range[1]);
+		z = (grid[i][j]-grid.zlim[0])/range[2];
+		if(z<0.0) z = 0.0;
+		if(z>1.0) z = 1.0;
+
+		ctx.fillStyle = "#" + (Math.floor(15*z)).toString(16) + "00000";
 		ctx.fillRect(Math.round(x-wx/2), Math.round(y-wy/2), wx, wy);
 	    }
 
