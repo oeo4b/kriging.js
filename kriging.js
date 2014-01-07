@@ -397,8 +397,9 @@ var kriging = function() {
 	var a = Array(2), b = Array(2);
 	var lxlim = Array(2); // Local dimensions
 	var lylim = Array(2); // Local dimensions
-	var x = (xlim[1]-xlim[0])/width;
-	var y = (ylim[1]-ylim[0])/width;
+	var x = Math.ceil((xlim[1]-xlim[0])/width);
+	var y = Math.ceil((ylim[1]-ylim[0])/width);
+
 	var A = Array(x+1);
 	for(i=0;i<=x;i++) A[i] = Array(y+1);
 	for(i=0;i<n;i++) {
@@ -459,8 +460,8 @@ var kriging = function() {
 	    for(j=0;j<m;j++) {
 		if(grid[i][j]==undefined) continue;
 		x = canvas.width*(i*grid.width+grid.xlim[0]-xlim[0])/range[0];
-		y = canvas.height*(1 - (j*grid.width+grid.ylim[0]-ylim[0])/range[1]);
-		ctx.fillRect(x-wx/2, y-wx/2, wx, wy);
+		y = canvas.height*(1-(j*grid.width+grid.ylim[0]-ylim[0])/range[1]);
+		ctx.fillRect(x-wx/2, y-wy/2, wx, wy);
 	    }
 
     };
