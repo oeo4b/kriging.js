@@ -445,7 +445,7 @@ var kriging = function() {
     };
 
     // Plotting on the DOM
-    kriging.plot = function(canvas, grid, xlim, ylim) {
+    kriging.plot = function(canvas, grid, xlim, ylim, colors) {
 	// Clear screen 
 	var ctx = canvas.getContext("2d");
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -466,7 +466,7 @@ var kriging = function() {
 		if(z<0.0) z = 0.0;
 		if(z>1.0) z = 1.0;
 
-		ctx.fillStyle = "#" + (Math.floor(15*z)).toString(16) + "00000";
+		ctx.fillStyle = colors[Math.floor((colors.length-1)*z)];
 		ctx.fillRect(Math.round(x-wx/2), Math.round(y-wy/2), wx, wy);
 	    }
 
