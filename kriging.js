@@ -239,7 +239,7 @@ var kriging = function() {
 		    Math.pow(y[i]-y[j], 2), 0.5);
 		distance[k][1] = Math.abs(t[i]-t[j]);
 	    }
-	distance.sort();
+	distance.sort(function(a, b) { return a[0] - b[0]; });
 	variogram.range = distance[(n*n-n)/2-1][0];
 
 	// Bin lag distance
