@@ -11,10 +11,6 @@ Array.prototype.mean = function() {
 	sum += this[i];
     return sum / this.length;
 };
-Array.prototype.rep = function(n) {
-    return Array.apply(null, new Array(n))
-    .map(Number.prototype.valueOf, this[0]);
-};
 Array.prototype.pip = function(x, y) {
     var i, j, c = false;
     for(i=0,j=this.length-1;i<this.length;j=i++) {
@@ -29,11 +25,19 @@ Array.prototype.pip = function(x, y) {
 var kriging = function() {
     var kriging = {};
 
+    var createArrayWithValues = function(value, n) {
+        var array = [];
+        for ( var i = 0; i < n; i++) {
+            array.push(value);
+        }
+        return array;
+    };
+
     // Matrix algebra
     kriging_matrix_diag = function(c, n) {
-	var i, Z = [0].rep(n*n);
-	for(i=0;i<n;i++) Z[i*n+i] = c;
-	return Z;
+        var Z = createArrayWithValues(0, n * n);
+        for(i=0;i<n;i++) Z[i*n+i] = c;
+        return Z;
     };
     kriging_matrix_transpose = function(X, n, m) {
 	var i, j, Z = Array(m*n);
@@ -245,8 +249,8 @@ var kriging = function() {
 	// Bin lag distance
 	var lags = ((n*n-n)/2)>30?30:(n*n-n)/2;
 	var tolerance = variogram.range/lags;
-	var lag = [0].rep(lags);
-	var semi = [0].rep(lags);
+	var lag = createArrayWithValues(0,lags);
+	var semi = createArrayWithValues(0,lags);
 	if(lags<30) {
 	    for(l=0;l<lags;l++) {
 		lag[l] = distance[l][0];
@@ -273,7 +277,7 @@ var kriging = function() {
 	// Feature transformation
 	n = l;
 	variogram.range = lag[n-1]-lag[0];
-	var X = [1].rep(2*n);
+	 var X = createArrayWithValues(1,2 * n);
 	var Y = Array(n);
 	var A = variogram.A;
 	for(i=0;i<n;i++) {
