@@ -18,7 +18,7 @@ Array.prototype.rep = function(n) {
 Array.prototype.pip = function(x, y) {
     var i, j, c = false;
     for(i=0,j=this.length-1;i<this.length;j=i++) {
-	if( ((this[i][1]>y) != (this[j][1]>y)) && 
+	if( ((this[i][1]>y) != (this[j][1]>y)) &&
 	    (x<(this[j][0]-this[i][0]) * (y-this[i][1]) / (this[j][1]-this[i][1]) + this[i][0]) ) {
 	    c = !c;
 	}
@@ -68,7 +68,7 @@ var kriging = function() {
 	return Z;
     };
     // Cholesky decomposition
-    kriging_matrix_chol = function(X, n) { 
+    kriging_matrix_chol = function(X, n) {
 	var i, j, k, sum, p = Array(n);
 	for(i=0;i<n;i++) p[i] = X[i*n+i];
 	for(i=0;i<n;i++) {
@@ -123,7 +123,7 @@ var kriging = function() {
 	var i, icol, irow, j, k, l, ll;
 	var big, dum, pivinv, temp;
 
-	for(i=0;i<n;i++) 
+	for(i=0;i<n;i++)
 	    for(j=0;j<n;j++) {
 		if(i==j) b[i*n+j] = 1;
 		else b[i*n+j] = 0;
@@ -177,7 +177,7 @@ var kriging = function() {
 		}
 	    }
 	}
-	for(l=(n-1);l>=0;l--) 
+	for(l=(n-1);l>=0;l--)
 	    if(indxr[l]!=indxc[l]) {
 		for(k=0;k<n;k++) {
 		    temp = X[k*n+indxr[l]];
@@ -185,7 +185,7 @@ var kriging = function() {
 		    X[k*n+indxc[l]] = temp;
 		}
 	    }
-	
+
 	return true;
     }
 
@@ -317,15 +317,15 @@ var kriging = function() {
 	    for(j=0;j<i;j++) {
 		K[i*n+j] = variogram.model(Math.pow(Math.pow(x[i]-x[j], 2)+
 						    Math.pow(y[i]-y[j], 2), 0.5),
-					   variogram.nugget, 
-					   variogram.range, 
-					   variogram.sill, 
+					   variogram.nugget,
+					   variogram.range,
+					   variogram.sill,
 					   variogram.A);
 		K[j*n+i] = K[i*n+j];
 	    }
-	    K[i*n+i] = variogram.model(0, variogram.nugget, 
-				       variogram.range, 
-				       variogram.sill, 
+	    K[i*n+i] = variogram.model(0, variogram.nugget,
+				       variogram.range,
+				       variogram.sill,
 				       variogram.A);
 	}
 
@@ -354,7 +354,7 @@ var kriging = function() {
 	for(i=0;i<variogram.n;i++)
 	    k[i] = variogram.model(Math.pow(Math.pow(x-variogram.x[i], 2)+
 					    Math.pow(y-variogram.y[i], 2), 0.5),
-				   variogram.nugget, variogram.range, 
+				   variogram.nugget, variogram.range,
 				   variogram.sill, variogram.A);
 	return kriging_matrix_multiply(k, variogram.M, 1, variogram.n, 1)[0];
     };
@@ -363,11 +363,11 @@ var kriging = function() {
 	for(i=0;i<variogram.n;i++)
 	    k[i] = variogram.model(Math.pow(Math.pow(x-variogram.x[i], 2)+
 					    Math.pow(y-variogram.y[i], 2), 0.5),
-				   variogram.nugget, variogram.range, 
+				   variogram.nugget, variogram.range,
 				   variogram.sill, variogram.A);
-	return variogram.model(0, variogram.nugget, variogram.range, 
+	return variogram.model(0, variogram.nugget, variogram.range,
 			variogram.sill, variogram.A)+
-	kriging_matrix_multiply(kriging_matrix_multiply(k, variogram.K, 
+	kriging_matrix_multiply(kriging_matrix_multiply(k, variogram.K,
 							1, variogram.n, variogram.n),
 				k, 1, variogram.n, 1)[0];
     };
@@ -376,17 +376,17 @@ var kriging = function() {
     kriging.grid = function(polygons, variogram, width) {
 	var i, j, k, n = polygons.length;
 	if(n==0) return;
-	
+
 	// Boundaries of polygons space
 	var xlim = [polygons[0][0][0], polygons[0][0][0]];
 	var ylim = [polygons[0][0][1], polygons[0][0][1]];
 	for(i=0;i<n;i++) // Polygons
 	    for(j=0;j<polygons[i].length;j++) { // Vertices
-		if(polygons[i][j][0]<xlim[0]) 
+		if(polygons[i][j][0]<xlim[0])
 		    xlim[0] = polygons[i][j][0];
 		if(polygons[i][j][0]>xlim[1])
 		    xlim[1] = polygons[i][j][0];
-		if(polygons[i][j][1]<ylim[0]) 
+		if(polygons[i][j][1]<ylim[0])
 		    ylim[0] = polygons[i][j][1];
 		if(polygons[i][j][1]>ylim[1])
 		    ylim[1] = polygons[i][j][1];
@@ -409,11 +409,11 @@ var kriging = function() {
 	    lylim[0] = polygons[i][0][1];
 	    lylim[1] = lylim[0];
 	    for(j=1;j<polygons[i].length;j++) { // Vertices
-		if(polygons[i][j][0]<lxlim[0]) 
+		if(polygons[i][j][0]<lxlim[0])
 		    lxlim[0] = polygons[i][j][0];
 		if(polygons[i][j][0]>lxlim[1])
 		    lxlim[1] = polygons[i][j][0];
-		if(polygons[i][j][1]<lylim[0]) 
+		if(polygons[i][j][1]<lylim[0])
 		    lylim[0] = polygons[i][j][1];
 		if(polygons[i][j][1]>lylim[1])
 		    lylim[1] = polygons[i][j][1];
@@ -446,7 +446,7 @@ var kriging = function() {
 
     // Plotting on the DOM
     kriging.plot = function(canvas, grid, xlim, ylim, colors) {
-	// Clear screen 
+	// Clear screen
 	var ctx = canvas.getContext("2d");
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -471,7 +471,11 @@ var kriging = function() {
 	    }
 
     };
-    
+
 
     return kriging;
 }();
+
+if (module && module.exports){
+    module.exports = kriging;
+}
