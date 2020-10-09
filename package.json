@@ -1,0 +1,22 @@
+{
+  "name": "kriging.js",
+  "version": "1.0.0",
+  "description": "Javascript library for geospatial prediction and mapping via ordinary kriging http://oeo4b.github.io",
+  "main": "kriging.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oeo4b/kriging.js.git"
+  },
+  "keywords": [
+    "kriging"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oeo4b/kriging.js/issues"
+  },
+  "homepage": "https://github.com/oeo4b/kriging.js#readme"
+}
